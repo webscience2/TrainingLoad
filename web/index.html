@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KinetIQ - Intelligent Training is Coming</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        :root {
+            --primary-color: #007BFF; /* A vibrant blue */
+            --background-color: #121212; /* Dark background */
+            --text-color: #EAEAEA;
+            --secondary-text-color: #B0B0B0;
+            --card-background: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(18, 18, 18, 0.85), rgba(18, 18, 18, 0.85)),
+                url('https://images.unsplash.com/photo-1541625253328-b9a8c4e39a29?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+       .container {
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+            padding: 40px;
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+       .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+       .logo span {
+            color: var(--text-color);
+            font-weight: 300;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+       .subtitle {
+            font-size: 1.2rem;
+            color: var(--secondary-text-color);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+       .features {
+            display: flex;
+            justify-content: space-around;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+       .feature {
+            flex: 1;
+            min-width: 150px;
+            padding: 1rem;
+        }
+
+       .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+       .feature h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+       .feature p {
+            font-size: 0.85rem;
+            color: var(--secondary-text-color);
+        }
+
+       .cta-form {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+       .cta-form input[type="email"] {
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(0,0,0,0.2);
+            color: var(--text-color);
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+       .cta-form input[type="email"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+       .cta-form button {
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            background-color: var(--primary-color);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+       .cta-form button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: var(--secondary-text-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo">Kinet<span>IQ</span></div>
+        </header>
+        
+        <main>
+            <h1>Intelligent Training is Coming Soon</h1>
+            <p class="subtitle">
+                Stop guessing. Start adapting. The first training platform that truly understands your body's readiness to perform, powered by your Garmin data.
+            </p>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">⚡️</div>
+                    <h3>Unified Load</h3>
+                    <p>A single, scientific score for all your runs and rides.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Injury Prevention</h3>
+                    <p>Proactive ACWR analysis to keep you in the sweet spot.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">❤️</div>
+                    <h3>HRV Readiness</h3>
+                    <p>Know when to push and when to recover, every single day.</p>
+                </div>
+            </div>
+
+            <p class="subtitle">Be the first to unlock your peak potential.</p>
+            <form class="cta-form" action="#" method="post">
+                <input type="email" name="email" placeholder="Enter your email address" required>
+                <button type="submit">Notify Me</button>
+            </form>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 KinetIQ. All rights reserved.</p>
+        </footer>
+    </div>
+
+</body>
+</html>
