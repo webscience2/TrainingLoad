@@ -3,211 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KinetIQ - Intelligent Training is Coming</title>
+    <title>AthletaSync - Intelligent Training Load Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-
-        :root {
-            --primary-color: #007BFF; /* A vibrant blue */
-            --background-color: #121212; /* Dark background */
-            --text-color: #EAEAEA;
-            --secondary-text-color: #B0B0B0;
-            --card-background: rgba(255, 255, 255, 0.05);
-            --border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-image: 
-                linear-gradient(rgba(18, 18, 18, 0.85), rgba(18, 18, 18, 0.85)),
-                url('https://images.unsplash.com/photo-1541625253328-b9a8c4e39a29?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
         }
-
-       .container {
-            max-width: 800px;
-            width: 90%;
-            text-align: center;
-            padding: 40px;
-            background: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            animation: fadeIn 1.5s ease-in-out;
+        .gradient-text {
+            background: linear-gradient(90deg, #38bdf8, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .glow {
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4), 0 0 30px rgba(99, 102, 241, 0.3);
         }
-
-       .logo {
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
-
-       .logo span {
-            color: var(--text-color);
-            font-weight: 300;
-        }
-
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-
-       .subtitle {
-            font-size: 1.2rem;
-            color: var(--secondary-text-color);
-            margin-bottom: 2rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-       .features {
-            display: flex;
-            justify-content: space-around;
-            gap: 1rem;
-            margin-bottom: 2.5rem;
-            flex-wrap: wrap;
-        }
-
-       .feature {
-            flex: 1;
-            min-width: 150px;
-            padding: 1rem;
-        }
-
-       .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--primary-color);
-        }
-
-       .feature h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-       .feature p {
-            font-size: 0.85rem;
-            color: var(--secondary-text-color);
-        }
-
-       .cta-form {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-       .cta-form input[type="email"] {
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background-color: rgba(0,0,0,0.2);
-            color: var(--text-color);
-            font-size: 1rem;
-            width: 100%;
-            max-width: 300px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-       .cta-form input[type="email"]:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-        }
-
-       .cta-form button {
-            padding: 12px 25px;
-            border-radius: 8px;
-            border: none;
-            background-color: var(--primary-color);
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-       .cta-form button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-
-        footer {
-            margin-top: 2rem;
-            font-size: 0.8rem;
-            color: var(--secondary-text-color);
-        }
-
     </style>
 </head>
-<body>
-
-    <div class="container">
-        <header>
-            <div class="logo">Kinet<span>IQ</span></div>
-        </header>
+<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-2xl mx-auto text-center">
         
-        <main>
-            <h1>Intelligent Training is Coming Soon</h1>
-            <p class="subtitle">
-                Stop guessing. Start adapting. The first training platform that truly understands your body's readiness to perform, powered by your Garmin data.
+        <header class="mb-8">
+            <h1 class="text-5xl md:text-6xl font-black gradient-text tracking-tighter">AthletaSync</h1>
+            <p class="text-xl md:text-2xl text-gray-400 mt-2 font-light">Peak Performance, Synchronized.</p>
+        </header>
+
+        <main class="bg-gray-800/50 backdrop-blur-sm p-8 rounded-2xl border border-gray-700 shadow-2xl">
+            <div class="flex justify-center items-center space-x-6 mb-6">
+                <!-- Running Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-person-running text-sky-400" viewBox="0 0 16 16">
+                    <path d="M9.554 1.343A1.5 1.5 0 0 1 11.5 0h.058a1.5 1.5 0 0 1 1.442 1.343l.66 3.963a.5.5 0 0 1-.99.166l-.66-3.963a.5.5 0 0 0-.945-.205L9.661 3.5l.7 4.2a.5.5 0 0 1-.99.166l-.7-4.2-1.42 2.13a.5.5 0 0 1-.854-.567l1.42-2.13-1.012-2.024a.5.5 0 0 1 .894-.447l1.012 2.024z"/>
+                    <path d="M4.5 9.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                    <path d="M6.255 4.342a.5.5 0 0 1 .1 1.033l-1.432.716a.5.5 0 0 1-.63-.732l1.432-.716a.5.5 0 0 1 .53-.3zM14 13.5a.5.5 0 0 1-.5.5H1.5a.5.5 0 0 1 0-1H13a.5.5 0 0 1 .5.5M15.5 6.5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1 0-1h5a.5.5 0 0 1 .5.5m-6.52 4.356a.5.5 0 0 1-.633.72l-1.63-1.164a.5.5 0 0 1 .633-.72l1.63 1.164zM3.232 10.455a.5.5 0 0 1 .633-.72l1.63 1.164a.5.5 0 0 1-.633.72l-1.63-1.164z"/>
+                </svg>
+                 <!-- Sync Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-repeat text-gray-500" viewBox="0 0 16 16">
+                  <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+                  <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5A5.002 5.002 0 0 0 8 3M3.5 13A5.002 5.002 0 0 0 8 15c1.552 0 2.94-.707 3.857-1.818a.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.5a5.002 5.002 0 0 0 0 4"/>
+                </svg>
+                <!-- Cycling Icon -->
+                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-bicycle text-indigo-400" viewBox="0 0 16 16">
+                    <path d="M4 4.5a.5.5 0 0 1 .5-.5H6a.5.5 0 0 1 0 1v.5h4.14l.386-1.158A.5.5 0 0 1 11 4h1a.5.5 0 0 1 0 1h-.64l-.311.935.807 1.29a3 3 0 1 1-.848.53l-.508-.812-2.076 3.322A.5.5 0 0 1 8 10.5H5.959a3 3 0 1 1-1.815-3.274L5 5.856V5h-.5a.5.5 0 0 1-.5-.5m1.5 2.443-.508.814c.5.444.85 1.054.967 1.743h1.139zM8 9.057 9.598 6.5H6.402zM4.937 9.5a1.997 1.997 0 0 0-.487-.877l-.548.877zM3.6 10.2a2 2 0 1 0 .8.4zM12 10.2a2 2 0 1 0 .8.4z"/>
+                </svg>
+            </div>
+            
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">The Future of Training is Coming.</h2>
+            <p class="text-lg text-gray-300 max-w-xl mx-auto mb-8">
+                Stop guessing your limits. AthletaSync analyzes your run and bike data from Garmin, using proven sports science like ACWR and HRV to recommend your optimal training load. Prevent injury, smash your goals, and train smarter.
             </p>
 
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-icon">⚡️</div>
-                    <h3>Unified Load</h3>
-                    <p>A single, scientific score for all your runs and rides.</p>
+            <form class="w-full max-w-md mx-auto">
+                <label for="email" class="sr-only">Email address</label>
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <input type="email" name="email" id="email" class="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 transition duration-200" placeholder="Enter your email to get notified" required>
+                    <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg glow transition duration-200">
+                        Notify Me
+                    </button>
                 </div>
-                <div class="feature">
-                    <div class="feature-icon">🛡️</div>
-                    <h3>Injury Prevention</h3>
-                    <p>Proactive ACWR analysis to keep you in the sweet spot.</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">❤️</div>
-                    <h3>HRV Readiness</h3>
-                    <p>Know when to push and when to recover, every single day.</p>
-                </div>
-            </div>
-
-            <p class="subtitle">Be the first to unlock your peak potential.</p>
-            <form class="cta-form" action="#" method="post">
-                <input type="email" name="email" placeholder="Enter your email address" required>
-                <button type="submit">Notify Me</button>
             </form>
         </main>
 
-        <footer>
-            <p>&copy; 2025 KinetIQ. All rights reserved.</p>
+        <footer class="mt-8 text-gray-500">
+            <p>&copy; 2025 AthletaSync. All rights reserved.</p>
+            <a href="./privacy_policy.html" class="text-sky-400 hover:text-sky-300 transition">Privacy Policy</a>
         </footer>
     </div>
-
 </body>
 </html>
+
