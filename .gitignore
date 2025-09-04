@@ -1,1 +1,84 @@
+# Dependencies
+node_modules/
+backend/.venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+*.out
+
+# Environment variables and secrets
+.env
+.env.local
+.env.production
+.env.development
+*.secret
+secret.*
+secrets/
+
+# API Keys and credentials
+*api_key*
+*secret*
+*password*
+*token*
+*.key
+*.pem
+*.p12
+*.jks
+*.crt
+*.cer
+auth.json
+credentials.json
+service-account*.json
+trainload-app-*.json
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
 .DS_Store
+Thumbs.db
+.directory
+
+# Build outputs
+dist/
+build/
+.next/
+.nuxt/
+coverage/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Cache directories
+.cache/
+.parcel-cache/
+.npm/
+.yarn/
+.pnpm-store/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Git sensitive
+.git/hooks/
+.git/info/exclude
