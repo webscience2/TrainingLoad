@@ -13,7 +13,7 @@ FastAPI + React + PostgreSQL Cloud SQL + APScheduler + UV + Google App Engine
 ## Core Flow
 1. Strava OAuth → Research thresholds → Activity import (90d) → UTL calculation (TSS/rTSS/TRIMP)
 2. Wellness data (Intervals.icu) → UTL modifiers (HRV/sleep/readiness) + Resting HR updates → Auto recalculation
-3. Background jobs: 30min sync, daily import, weekly thresholds, monthly UTL recalc, resting HR updates (every 3d)
+3. Background jobs: **3.5h quick sync** (activities + wellness), daily comprehensive sync, weekly thresholds, monthly UTL recalc, resting HR updates (every 3d)
 
 ## UTL Hierarchy
 TSS (power) > rTSS (pace) > TRIMP (HR) + wellness modifiers (0.8x-1.1x range)
