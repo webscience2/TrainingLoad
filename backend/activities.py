@@ -8,6 +8,7 @@ import logging
 from models import User, Activity, Threshold
 from utils import calculate_utl
 from config import get_db, SessionLocal
+from research_threshold_calculator import update_thresholds_from_activity_streams
 
 router = APIRouter()
 
@@ -84,16 +85,59 @@ def _fetch_and_process_activities(user_id: int, db: Session, backfill_days: int 
             )
 
             if threshold:
-                # Pass both summary and stream data to UTL calculation
-                utl_score, method = calculate_utl(act_summary, threshold, activity_streams)
+                # Get wellness data for the activity date (if available)
+                activity_date = act_summary.get("start_date")
+                wellness_data = None
+                if activity_date:
+                    try:
+                        from datetime import datetime
+                        from models import WellnessData
+                        # Parse the activity date
+                        if isinstance(activity_date, str):
+                            activity_dt = datetime.fromisoformat(activity_date.replace('Z', '+00:00'))
+                        else:
+                            activity_dt = activity_date
+                        
+                        # Look for wellness data on the same date
+                        wellness_entry = db.query(WellnessData).filter(
+                            WellnessData.user_id == user_id,
+                            WellnessData.date == activity_dt.date()
+                        ).first()
+                        
+                        if wellness_entry:
+                            wellness_data = {
+                                'hrv': wellness_entry.hrv,
+                                'sleepScore': wellness_entry.sleep_score,
+                                'readiness': wellness_entry.readiness_score,  # Fixed: use readiness_score
+                                'restingHR': wellness_entry.resting_hr
+                            }
+                    except Exception as e:
+                        logging.warning(f"Could not fetch wellness data for activity {strava_id}: {e}")
+                
+                # Pass summary, stream data, and wellness data to UTL calculation
+                utl_score, method = calculate_utl(act_summary, threshold, activity_streams, wellness_data)
                 activity.utl_score = float(utl_score)  # Ensure it's a Python float, not numpy
                 activity.calculation_method = method
-                logging.info(f"Calculated UTL {utl_score:.2f} using {method} for activity {strava_id}")
+                
+                wellness_info = " (with wellness data)" if wellness_data else ""
+                logging.info(f"Calculated UTL {utl_score:.2f} using {method} for activity {strava_id}{wellness_info}")
             else:
                 logging.warning(f"No threshold data for user {user_id}, skipping UTL calculation for activity {strava_id}")
 
             db.add(activity)
             total_imported += 1
+            
+            # Analyze streams for threshold updates if this is a significant activity
+            if activity_streams and (act_summary.get("type") in ["Ride", "VirtualRide", "Run", "VirtualRun"]):
+                try:
+                    threshold_analysis = update_thresholds_from_activity_streams(
+                        strava_id, user_id
+                    )
+                    if threshold_analysis.get('thresholds_updated'):
+                        logging.info(f"Updated thresholds from activity {strava_id}: {threshold_analysis}")
+                except Exception as e:
+                    logging.warning(f"Could not analyze thresholds for activity {strava_id}: {e}")
+            
             logging.info(f"Imported activity {strava_id}: {act_summary.get('name')} for user {user_id}")
 
         db.commit()
@@ -129,3 +173,15 @@ def sync_strava_activities():
     finally:
         db.close()
     logging.info("Finished scheduled Strava activity sync.")
+
+@router.get("/count/{user_id}")
+def get_activity_count(user_id: int, db: Session = Depends(get_db)):
+    """Get the count of activities for a user"""
+    try:
+        logging.info(f"Getting activity count for user {user_id}")
+        count = db.query(Activity).filter_by(user_id=user_id).count()
+        logging.info(f"Found {count} activities for user {user_id}")
+        return {"activity_count": count}
+    except Exception as e:
+        logging.error(f"Error getting activity count for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching activity count")

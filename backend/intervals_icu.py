@@ -182,11 +182,11 @@ async def connect_intervals_account(
 @router.post("/sync_wellness")
 async def sync_wellness_data(
     user_id: int,
-    days: int = 30,
+    days: int = 365,  # Changed from 30 to 365 to match Strava sync timeframe (12 months)
     background_tasks: BackgroundTasks = BackgroundTasks(),
     db: Session = Depends(get_db)
 ):
-    """Sync wellness data from intervals.icu"""
+    """Sync wellness data from intervals.icu for the last 12 months (365 days)"""
     try:
         user = db.query(User).filter(User.user_id == user_id).first()
         if not user:
@@ -272,9 +272,129 @@ def _sync_wellness_data_task(user_id: int, api_key: str, athlete_id: str, days: 
         db.commit()
         logging.info(f"Successfully synced {len(wellness_data)} wellness entries for user {user_id}")
         
+        # Automatically recalculate UTL scores with new wellness data
+        if len(wellness_data) > 0:
+            try:
+                logging.info(f"Auto-recalculating UTL scores with wellness data for user {user_id}")
+                from dashboard import recalculate_utl_with_wellness_internal
+                result = recalculate_utl_with_wellness_internal(user_id, db)
+                logging.info(f"Auto-recalculation complete: {result.get('message', 'Unknown result')}")
+                
+                # Update resting HR threshold from recent wellness data
+                updated_resting_hr = update_resting_hr_from_wellness(user_id, db)
+                if updated_resting_hr:
+                    logging.info(f"Updated resting HR threshold for user {user_id}: {updated_resting_hr} bpm")
+                    
+            except Exception as recalc_error:
+                logging.error(f"Error during auto UTL recalculation for user {user_id}: {str(recalc_error)}")
+        
     except Exception as e:
         logging.error(f"Error syncing wellness data: {str(e)}")
         db.rollback()
+
+
+def update_resting_hr_from_wellness(user_id: int, db: Session, lookback_days: int = 14) -> Optional[int]:
+    """
+    Calculate average resting HR from recent wellness data and update thresholds.
+    
+    Args:
+        user_id: User ID to update
+        db: Database session
+        lookback_days: Number of recent days to analyze (default: 14 days)
+    
+    Returns:
+        Updated resting HR value or None if no update made
+    """
+    try:
+        from datetime import datetime, timedelta
+        from models import WellnessData, Threshold
+        
+        # Get recent wellness data with resting HR
+        cutoff_date = datetime.now() - timedelta(days=lookback_days)
+        recent_wellness = db.query(WellnessData).filter(
+            WellnessData.user_id == user_id,
+            WellnessData.date >= cutoff_date,
+            WellnessData.resting_hr.isnot(None),
+            WellnessData.resting_hr > 30,  # Sanity check
+            WellnessData.resting_hr < 120   # Sanity check
+        ).order_by(WellnessData.date.desc()).all()
+        
+        if len(recent_wellness) < 3:  # Need at least 3 data points
+            logging.debug(f"Insufficient wellness data for resting HR update (user {user_id}): {len(recent_wellness)} points")
+            return None
+        
+        # Calculate average resting HR
+        resting_hrs = [w.resting_hr for w in recent_wellness]
+        avg_resting_hr = sum(resting_hrs) / len(resting_hrs)
+        rounded_resting_hr = round(avg_resting_hr)
+        
+        logging.info(f"Calculated avg resting HR for user {user_id}: {avg_resting_hr:.1f} bpm from {len(resting_hrs)} measurements")
+        
+        # Get or create threshold record
+        threshold = db.query(Threshold).filter_by(user_id=user_id).first()
+        if not threshold:
+            # Create new threshold record
+            threshold = Threshold(user_id=user_id)
+            db.add(threshold)
+        
+        # Check if this is a significant change (>5 bpm difference)
+        old_resting_hr = threshold.resting_hr
+        if old_resting_hr and abs(rounded_resting_hr - old_resting_hr) < 5:
+            logging.debug(f"Resting HR change too small to update (user {user_id}): {old_resting_hr} -> {rounded_resting_hr}")
+            return None
+        
+        # Update resting HR
+        threshold.resting_hr = rounded_resting_hr
+        threshold.date_updated = datetime.now()
+        
+        db.commit()
+        
+        logging.info(f"Updated resting HR threshold for user {user_id}: {old_resting_hr} -> {rounded_resting_hr} bpm")
+        
+        return rounded_resting_hr
+        
+    except Exception as e:
+        logging.error(f"Error updating resting HR from wellness data: {str(e)}")
+        db.rollback()
+        return None
+
+
+@router.post("/update_resting_hr/{user_id}")
+async def update_resting_hr_endpoint(
+    user_id: int,
+    lookback_days: int = 14,
+    db: Session = Depends(get_db)
+):
+    """
+    Manually update resting HR threshold from recent wellness data.
+    
+    Args:
+        user_id: User ID to update
+        lookback_days: Number of recent days to analyze (default: 14)
+    """
+    try:
+        user = db.query(User).filter(User.user_id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        updated_rhr = update_resting_hr_from_wellness(user_id, db, lookback_days)
+        
+        if updated_rhr:
+            return {
+                "message": f"Resting HR updated to {updated_rhr} bpm from last {lookback_days} days of wellness data",
+                "resting_hr": updated_rhr,
+                "lookback_days": lookback_days
+            }
+        else:
+            return {
+                "message": "No resting HR update made - insufficient data or change too small",
+                "resting_hr": None,
+                "lookback_days": lookback_days
+            }
+        
+    except Exception as e:
+        logging.error(f"Error in resting HR update endpoint: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update resting HR: {str(e)}")
 
 
 @router.get("/wellness/{user_id}")

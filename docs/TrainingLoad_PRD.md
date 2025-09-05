@@ -204,3 +204,68 @@ CTL (Fitness): A blue line showing the long-term trend of fitness.
 ATL (Fatigue): A pink line showing short-term fatigue.
 Training Stress Balance (TSB = CTL - ATL): Yellow bars representing daily form or readiness. Positive TSB indicates good form, while negative TSB indicates fatigue.
 This chart gives the user a powerful visual tool to understand their training cycles, see how their fitness is building, and plan for periods of peak form for their target events.
+
+Section 13: Enhanced Training Recommendations with Distance Guidance
+
+13.1 Science-Based Distance Recommendations
+
+Building upon the core UTL-based recommendations, the system now provides comprehensive distance guidance for running activities that follows established sports science principles:
+
+Progressive Overload: Weekly distance targets follow the 10% rule for safe progression, adjusted based on individual training history and current fitness level.
+Session-Specific Distance Zones: Each running session type (easy, aerobic, tempo, threshold, interval) has scientifically-determined distance ranges that optimize training adaptations while minimizing injury risk.
+Weekly Volume Distribution: Total weekly running volume is distributed across session types using evidence-based ratios that support polarized training methodology.
+
+13.2 Distance Zone Calculations
+
+The system calculates session-specific distance recommendations using the following methodology:
+
+Easy Runs: 15-30% of weekly volume (min 3km, max 12km)
+Aerobic Base Runs: 18-35% of weekly volume (min 4km, max 15km)
+Tempo Sessions: 12-25% of weekly volume (min 3km, max 10km)
+Threshold Runs: 10-20% of weekly volume (min 3km, max 8km)
+High-Intensity Intervals: 8-15% of weekly volume (min 2km, max 6km)
+Long Runs: 25-35% of weekly volume (min 6km, max 25km)
+
+Distance ranges are dynamically adjusted based on:
+- Individual training history and current fitness level
+- Wellness status and recovery markers
+- ACWR risk assessment
+- Progressive overload principles
+
+13.3 Weekly Training Volume Targets
+
+Weekly Distance Calculation: The system converts historical UTL data into approximate weekly kilometer targets using sport-specific conversion factors that account for training intensity distribution.
+Risk-Adjusted Targets: Weekly targets are modified based on current ACWR status:
+- High Risk: 10% reduction from historical average
+- Moderate Risk: 5% increase (conservative progression)
+- Low Risk: 10% increase (standard progression)
+
+13.4 Integration with 5-Day Training Plans
+
+Enhanced Daily Recommendations: Each day's training plan now includes:
+- Session type based on periodization principles
+- Pace guidance derived from functional threshold pace
+- Distance range recommendations (min-max-optimal)
+- Session-specific notes explaining the training purpose
+
+Intelligent Session Scheduling: The system varies session types across the training week:
+- Day 1: Moderate effort session
+- Day 3: Higher intensity (wellness permitting)  
+- Day 5: Longer aerobic session
+- Recovery days incorporated based on wellness status
+
+13.5 User Interface Enhancements
+
+Distance Guidance Display: Running activities show both pace (min/km) and distance (km range) recommendations with clear visual indicators.
+Weekly Volume Summary: Dashboard displays weekly targets for running (km) and cycling (hours) with progress tracking.
+Training Distribution Visualization: Users see their planned weekly distribution following 80/15/5 polarized training principles.
+
+13.6 Scientific Validation
+
+The distance recommendation algorithms are based on:
+- Jack Daniels' Running Formula for training zones and distributions
+- Stephen Seiler's polarized training research
+- ACSM guidelines for progressive overload
+- Evidence-based injury prevention protocols from sports medicine literature
+
+This enhancement transforms the TrainSmart system from a load-monitoring tool into a comprehensive training prescription platform that provides actionable, science-based guidance for both training intensity and volume.

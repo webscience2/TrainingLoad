@@ -1,4 +1,20 @@
 {
+  "name": "trainingload",
+  "version": "1.0.0",
+  "description": "TrainingLoad - Evidence-based training load monitoring system",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview",
+    "backend": "cd backend && python main.py",
+    "start": "./start.sh",
+    "stop": "./stop.sh"
+  },
+  "workspaces": [
+    "frontend"
+  ],
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.2",
     "react": "^19.1.1",

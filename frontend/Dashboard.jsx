@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import TrainingRecommendations from './src/TrainingRecommendations';
 
 export default function Dashboard({ user, onLogout }) {
   const [dashboardData, setDashboardData] = useState(null);
@@ -21,6 +22,8 @@ export default function Dashboard({ user, onLogout }) {
   const [showIntervalsConnect, setShowIntervalsConnect] = useState(false);
   const [wellnessData, setWellnessData] = useState(null);
   const [syncingWellness, setSyncingWellness] = useState(false);
+  const [recalculatingUTL, setRecalculatingUTL] = useState(false);
+  const [showUTLInfo, setShowUTLInfo] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -160,8 +163,8 @@ export default function Dashboard({ user, onLogout }) {
   const syncWellnessData = async () => {
     setSyncingWellness(true);
     try {
-      // Use query parameters instead of JSON body, and sync 3 months of data
-      const response = await fetch(`http://localhost:8000/intervals/sync_wellness?user_id=${user.user_id}&days=91`, {
+      // Use query parameters instead of JSON body, and sync 12 months of data (matches Strava)
+      const response = await fetch(`http://localhost:8000/intervals/sync_wellness?user_id=${user.user_id}&days=365`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -171,7 +174,7 @@ export default function Dashboard({ user, onLogout }) {
       if (response.ok) {
         const result = await response.json();
         await fetchWellnessData();
-        alert(result.message || 'Wellness data sync started for last 3 months!');
+        alert(result.message || 'Wellness data sync started! UTL scores will be automatically recalculated with wellness modifiers.');
       } else {
         const error = await response.json();
         alert(error.detail || 'Failed to sync wellness data');
@@ -181,6 +184,43 @@ export default function Dashboard({ user, onLogout }) {
       alert('Failed to sync wellness data');
     } finally {
       setSyncingWellness(false);
+    }
+  };
+
+  const fetchUTLMethods = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/dashboard/utl-methods');
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      }
+    } catch (error) {
+      console.error('Error fetching UTL methods:', error);
+    }
+    return null;
+  };
+
+  const recalculateUTLWithWellness = async () => {
+    try {
+      setRecalculatingUTL(true);
+      const response = await fetch(`http://localhost:8000/dashboard/${user.user_id}/recalculate-utl`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        await fetchDashboardData(); // Refresh the dashboard
+        alert(`${result.message}. Updated ${result.updated_count} activities, ${result.wellness_applied_count} with wellness data modifiers.`);
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Failed to recalculate UTL scores');
+      }
+    } catch (error) {
+      console.error('Error recalculating UTL:', error);
+      alert('Failed to recalculate UTL scores');
+    } finally {
+      setRecalculatingUTL(false);
     }
   };
 
@@ -237,14 +277,52 @@ export default function Dashboard({ user, onLogout }) {
             <h1 style={{ margin: 0, color: '#1976d2', fontSize: '2rem', fontWeight: '700' }}>Training Dashboard</h1>
             <p style={{ margin: '0.5rem 0', color: '#666' }}>Welcome back, {user.name || 'Athlete'}!</p>
           </div>
-          <button
-            onClick={onLogout}
-            style={{ padding: '0.5rem 1rem', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-          >
-            Logout
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={() => {
+                if (confirm('Clear all browser data and logout? This will help test the new user flow.')) {
+                  console.log('🔍 FRONTEND DEBUG: Clear All Data clicked');
+                  console.log('🔍 FRONTEND DEBUG: Before clear - localStorage keys:', Object.keys(localStorage));
+                  
+                  // Clear all browser storage
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  
+                  console.log('🔍 FRONTEND DEBUG: After clear - localStorage keys:', Object.keys(localStorage));
+                  
+                  // Clear cookies
+                  document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                  });
+                  
+                  console.log('🔍 FRONTEND DEBUG: Cookies cleared, reloading page');
+                  // Reload page to clean state
+                  window.location.href = '/';
+                }
+              }}
+              style={{ padding: '0.5rem 1rem', background: '#ff9800', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+            >
+              Clear All Data
+            </button>
+            <button
+              onClick={onLogout}
+              style={{ padding: '0.5rem 1rem', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Import Status Message */}
+      {activity_summary.total_activities < 10 && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto', marginBottom: '2rem' }}>
+          <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', color: '#856404', padding: '1rem', borderRadius: '8px', textAlign: 'center' }}>
+            <strong>Note:</strong> We've imported {activity_summary.total_activities} activities so far. 
+            Still importing data in the background - this may take a while. More activities will improve your training zone calculations.
+          </div>
+        </div>
+      )}
 
       {/* Training Totals */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', marginBottom: '2rem' }}>
@@ -431,7 +509,7 @@ export default function Dashboard({ user, onLogout }) {
                 </span>
               </div>
 
-              {wellnessData && wellnessData.length > 0 ? (
+              {dashboardData.wellness_data && dashboardData.wellness_data.length > 0 ? (
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <h4 style={{ margin: 0, color: '#1976d2' }}>Recent Wellness Data</h4>
@@ -448,20 +526,20 @@ export default function Dashboard({ user, onLogout }) {
                         fontSize: '0.85rem'
                       }}
                     >
-                      {syncingWellness ? 'Syncing...' : 'Sync Data (3 months)'}
+                      {syncingWellness ? 'Syncing & Updating UTL...' : 'Sync Data (12 months)'}
                     </button>
                   </div>
                   
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-                    {wellnessData.slice(0, 1).map((data, index) => (
+                    {dashboardData.wellness_data.slice(0, 1).map((data, index) => (
                       <div key={index} style={{ padding: '1rem', background: '#f8f9fa', borderRadius: '8px' }}>
                         <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>
                           {new Date(data.date).toLocaleDateString()}
                         </div>
-                        {data.hrv4_training && (
+                        {data.hrv && (
                           <div style={{ marginBottom: '0.5rem' }}>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1976d2' }}>{data.hrv4_training}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#666' }}>HRV4Training</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1976d2' }}>{data.hrv.toFixed(1)}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#666' }}>HRV</div>
                           </div>
                         )}
                         {data.resting_hr && (
@@ -470,9 +548,9 @@ export default function Dashboard({ user, onLogout }) {
                             <div style={{ fontSize: '0.75rem', color: '#666' }}>Resting HR</div>
                           </div>
                         )}
-                        {data.sleep_hours && (
+                        {data.sleep_duration && (
                           <div>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1976d2' }}>{data.sleep_hours}h</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1976d2' }}>{data.sleep_duration.toFixed(1)}h</div>
                             <div style={{ fontSize: '0.75rem', color: '#666' }}>Sleep</div>
                           </div>
                         )}
@@ -480,22 +558,22 @@ export default function Dashboard({ user, onLogout }) {
                     ))}
                     
                     {/* Summary stats from recent data */}
-                    {wellnessData.length > 1 && (
+                    {dashboardData.wellness_data.length > 1 && (
                       <>
                         <div style={{ padding: '1rem', background: '#f0f8ff', borderRadius: '8px' }}>
                           <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>7-Day Average</div>
-                          {wellnessData.filter(d => d.resting_hr).length > 0 && (
+                          {dashboardData.wellness_data.filter(d => d.resting_hr).length > 0 && (
                             <div style={{ marginBottom: '0.5rem' }}>
                               <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1976d2' }}>
-                                {Math.round(wellnessData.filter(d => d.resting_hr).reduce((sum, d) => sum + d.resting_hr, 0) / wellnessData.filter(d => d.resting_hr).length)}
+                                {Math.round(dashboardData.wellness_data.filter(d => d.resting_hr).reduce((sum, d) => sum + d.resting_hr, 0) / dashboardData.wellness_data.filter(d => d.resting_hr).length)}
                               </div>
                               <div style={{ fontSize: '0.75rem', color: '#666' }}>Avg Resting HR</div>
                             </div>
                           )}
-                          {wellnessData.filter(d => d.sleep_hours).length > 0 && (
+                          {dashboardData.wellness_data.filter(d => d.sleep_duration).length > 0 && (
                             <div>
                               <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1976d2' }}>
-                                {(wellnessData.filter(d => d.sleep_hours).reduce((sum, d) => sum + d.sleep_hours, 0) / wellnessData.filter(d => d.sleep_hours).length).toFixed(1)}h
+                                {(dashboardData.wellness_data.filter(d => d.sleep_duration).reduce((sum, d) => sum + d.sleep_duration, 0) / dashboardData.wellness_data.filter(d => d.sleep_duration).length).toFixed(1)}h
                               </div>
                               <div style={{ fontSize: '0.75rem', color: '#666' }}>Avg Sleep</div>
                             </div>
@@ -506,7 +584,71 @@ export default function Dashboard({ user, onLogout }) {
                   </div>
                   
                   <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666' }}>
-                    Last synced: {wellnessData[0] ? new Date(wellnessData[0].date).toLocaleDateString() : 'Never'}
+                    Last synced: {dashboardData.wellness_data[0] ? new Date(dashboardData.wellness_data[0].date).toLocaleDateString() : 'Never'}
+                  </div>
+
+                  {/* Wellness-Enhanced UTL Section */}
+                  <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f0f8ff', borderRadius: '8px', border: '1px solid #e3f2fd' }}>
+                    <h4 style={{ margin: '0 0 1rem 0', color: '#1976d2' }}>✨ Enhanced Training Load with Wellness Data</h4>
+                    <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: '#666' }}>
+                      Your UTL scores are automatically adjusted based on wellness data (HRV, sleep, readiness). When you sync wellness data, historical UTL scores are automatically recalculated to reflect your recovery state.
+                    </p>
+                    
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={recalculateUTLWithWellness}
+                        disabled={recalculatingUTL}
+                        style={{ 
+                          padding: '0.5rem 1rem', 
+                          background: recalculatingUTL ? '#ccc' : '#4caf50', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '6px', 
+                          cursor: recalculatingUTL ? 'not-allowed' : 'pointer',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        {recalculatingUTL ? 'Recalculating...' : 'Manual Recalculation (if needed)'}
+                      </button>
+                      
+                      <button
+                        onClick={() => setShowUTLInfo(!showUTLInfo)}
+                        style={{ 
+                          padding: '0.5rem 1rem', 
+                          background: '#ff9800', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '6px', 
+                          cursor: 'pointer',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        {showUTLInfo ? 'Hide' : 'Show'} UTL Scoring Info
+                      </button>
+                    </div>
+
+                    {showUTLInfo && (
+                      <div style={{ marginTop: '1rem', padding: '1rem', background: 'white', borderRadius: '6px', border: '1px solid #e0e0e0' }}>
+                        <h5 style={{ margin: '0 0 0.75rem 0', color: '#1976d2' }}>Training Load Scoring Methods</h5>
+                        <div style={{ fontSize: '0.85rem', lineHeight: '1.4' }}>
+                          <div style={{ marginBottom: '0.75rem' }}>
+                            <strong>TSS (Training Stress Score):</strong> Power-based, most accurate for cycling. Range: 50-300+
+                          </div>
+                          <div style={{ marginBottom: '0.75rem' }}>
+                            <strong>rTSS (Running TSS):</strong> Pace-based for running activities. Range: 40-250
+                          </div>
+                          <div style={{ marginBottom: '0.75rem' }}>
+                            <strong>TRIMP (Training Impulse):</strong> Heart rate-based with activity scaling. Hiking gets lower scores than running at the same HR due to different physiological demands. Range: 20-150
+                          </div>
+                          <div style={{ marginBottom: '0.75rem' }}>
+                            <strong>Duration-Based:</strong> Conservative fallback for activities without detailed data. Range: 30-120
+                          </div>
+                          <div style={{ padding: '0.75rem', background: '#f5f5f5', borderRadius: '4px', marginTop: '0.75rem' }}>
+                            <strong>Wellness Modifiers:</strong> When available, HRV, sleep quality, and readiness can adjust your UTL by ±20% to reflect your body's daily capacity for training stress.
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -524,7 +666,7 @@ export default function Dashboard({ user, onLogout }) {
                       cursor: syncingWellness ? 'not-allowed' : 'pointer'
                     }}
                   >
-                    {syncingWellness ? 'Syncing...' : 'Sync Wellness Data (3 months)'}
+                    {syncingWellness ? 'Syncing & Updating UTL...' : 'Sync Wellness Data (12 months)'}
                   </button>
                 </div>
               )}
@@ -600,6 +742,11 @@ export default function Dashboard({ user, onLogout }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Training Recommendations */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', marginBottom: '2rem' }}>
+        <TrainingRecommendations userId={user.user_id} />
       </div>
 
       {/* Recent Activities */}

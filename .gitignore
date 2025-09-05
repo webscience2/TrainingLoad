@@ -7,6 +7,12 @@ __pycache__/
 *.pyo
 *.pyd
 
+# Lock files (exclude unnecessary ones, keep important ones)
+/package-lock.json          # Root-level Node.js not needed
+/backend/package-lock.json  # Backend is Python-based
+# Keep: uv.lock (Python dependencies)
+# Keep: frontend/package-lock.json (React dependencies)
+
 # Database files
 *.db
 *.sqlite

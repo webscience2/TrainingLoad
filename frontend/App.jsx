@@ -12,16 +12,24 @@ export default function App() {
   React.useEffect(() => {
     const checkExistingAuth = async () => {
       try {
+        console.log('🔍 FRONTEND DEBUG: Starting checkExistingAuth');
+        
         // Check localStorage for saved user data
         const savedUser = localStorage.getItem('trainload_user');
+        console.log('🔍 FRONTEND DEBUG: localStorage trainload_user:', savedUser);
+        
         if (savedUser) {
           const userData = JSON.parse(savedUser);
-          console.log('Found saved user:', userData);
+          console.log('🔍 FRONTEND DEBUG: Found saved user:', userData);
           
           // Verify user still exists and get their current status
+          console.log('🔍 FRONTEND DEBUG: Checking dashboard for user:', userData.user_id);
           const response = await fetch(`http://localhost:8000/dashboard/${userData.user_id}`);
+          console.log('🔍 FRONTEND DEBUG: Dashboard response status:', response.status);
+          
           if (response.ok) {
             const dashboardData = await response.json();
+            console.log('🔍 FRONTEND DEBUG: Dashboard data received, setting onboarded=true');
             // If dashboard returns data, user has completed onboarding
             setUser(userData);
             setOnboarded(true);
@@ -29,7 +37,7 @@ export default function App() {
             return;
           } else {
             // User data is stale, clear it
-            console.log('Stored user data is stale, clearing localStorage');
+            console.log('🔍 FRONTEND DEBUG: Stored user data is stale, clearing localStorage');
             localStorage.removeItem('trainload_user');
           }
         }
@@ -41,14 +49,27 @@ export default function App() {
         const email = params.get("email");
         const gender = params.get("gender");
         
+        console.log('🔍 FRONTEND DEBUG: URL params - userId:', userId, 'name:', name, 'email:', email, 'gender:', gender);
+        
         if (userId) {
-          const userData = { user_id: userId, name, email, gender };
+          // Don't include email in userData if it's not provided - let onboarding form handle it
+          const userData = { 
+            user_id: userId, 
+            name, 
+            gender,
+            ...(email ? { email } : {}) // Only include email if it exists
+          };
+          console.log('🔍 FRONTEND DEBUG: Creating userData from URL params:', userData);
           
           // Check if user has completed onboarding by trying to fetch dashboard
           try {
+            console.log('🔍 FRONTEND DEBUG: Checking if user needs onboarding, fetching dashboard for:', userId);
             const response = await fetch(`http://localhost:8000/dashboard/${userId}`);
+            console.log('🔍 FRONTEND DEBUG: Dashboard check response status:', response.status);
+            
             if (response.ok) {
               const dashboardData = await response.json();
+              console.log('🔍 FRONTEND DEBUG: User has dashboard data, setting onboarded=true');
               // User has dashboard data, they've completed onboarding
               setUser(userData);
               setOnboarded(true);
@@ -57,6 +78,7 @@ export default function App() {
               // Clean up URL
               window.history.replaceState({}, document.title, window.location.pathname);
             } else {
+              console.log('🔍 FRONTEND DEBUG: User needs onboarding, setting onboarded=false');
               // User exists but needs onboarding
               setUser(userData);
               setOnboarded(false);
@@ -65,12 +87,14 @@ export default function App() {
               window.history.replaceState({}, document.title, window.location.pathname);
             }
           } catch (error) {
-            console.error('Error checking user onboarding status:', error);
+            console.error('🔍 FRONTEND DEBUG: Error checking user onboarding status:', error);
             // Assume needs onboarding if we can't check
             setUser(userData);
             setOnboarded(false);
             window.history.replaceState({}, document.title, window.location.pathname);
           }
+        } else {
+          console.log('🔍 FRONTEND DEBUG: No URL params found, no user to set');
         }
       } catch (error) {
         console.error('Error checking authentication:', error);
@@ -102,7 +126,23 @@ export default function App() {
     setOnboarded(false);
     // Clear stored user data
     localStorage.removeItem('trainload_user');
+    
+    // Clear all localStorage and sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Clear all cookies for this domain
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    // Force clear URL parameters and reload
     window.history.replaceState({}, document.title, window.location.pathname);
+    
+    // Add a small delay then reload to ensure clean state
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   const handleClearCache = () => {
