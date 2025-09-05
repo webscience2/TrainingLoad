@@ -17,3 +17,25 @@
 __pycache__/
 # Ignored by the build system
 /setup.cfg
+
+# Development and local files
+.env
+.env.local
+.env.development
+.env.production.template
+*.log
+*.sqlite
+scheduler_jobs.sqlite
+cloud-sql-proxy
+node_modules/
+.python-version
+
+# Development scripts
+recalculate_utl_with_new_thresholds.py
+update_scientific_utl.py
+update_stream_based_thresholds.py
+streams_analysis.py
+create_sample_data.py
+
+# Documentation
+README.md

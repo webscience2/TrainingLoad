@@ -1,2 +1,49 @@
 runtime: python311
-entrypoint: uvicorn main:app --host 0.0.0.0 --port $PORT
+service: default
+
+# Instance configuration for production
+instance_class: F2
+automatic_scaling:
+  min_instances: 1
+  max_instances: 10
+  target_cpu_utilization: 0.6
+
+# Environment variables for production
+env_variables:
+  # Database configuration (set these in Google Cloud Console)
+  # DATABASE_URL: postgresql://user:password@/database?host=/cloudsql/project:region:instance
+  ENVIRONMENT: "production"
+  
+  # Strava API configuration (set in Google Cloud Console)
+  # STRAVA_CLIENT_ID: "your-strava-client-id"
+  # STRAVA_CLIENT_SECRET: "your-strava-client-secret"
+  
+  # Intervals.icu configuration (optional, set in Google Cloud Console)
+  # INTERVALS_ICU_BASE_URL: "https://intervals.icu/api/v1"
+
+# Enable Cloud SQL connections
+beta_settings:
+  cloud_sql_instances: PROJECT_ID:REGION:INSTANCE_NAME
+
+# Health check configuration
+readiness_check:
+  path: "/health"
+  check_interval_sec: 5
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+
+liveness_check:
+  path: "/health"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 4
+  success_threshold: 2
+
+# Network configuration
+network:
+  forwarded_ports:
+    - 8080/tcp
+
+# Entry point for the application
+entrypoint: python -m uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1

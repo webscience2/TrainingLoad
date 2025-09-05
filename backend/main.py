@@ -485,7 +485,33 @@ def root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "timestamp": "2025-09-04T22:30:00Z"}
+    """Enhanced health check for production monitoring."""
+    from datetime import datetime
+    import os
+    
+    try:
+        # Test database connection
+        db = SessionLocal()
+        db.execute("SELECT 1")
+        db.close()
+        db_status = "healthy"
+    except Exception as e:
+        db_status = f"unhealthy: {str(e)}"
+    
+    # Check scheduler status
+    scheduler_status = "running" if scheduler.running else "stopped"
+    
+    # Get environment info
+    environment = os.getenv("ENVIRONMENT", "development")
+    
+    return {
+        "status": "healthy" if db_status == "healthy" and scheduler.running else "unhealthy",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "environment": environment,
+        "database": db_status,
+        "scheduler": scheduler_status,
+        "version": "1.0.0"
+    }
 
 @app.get("/scheduler/jobs")
 def get_scheduled_jobs():
